@@ -39,40 +39,78 @@ POWERLEVEL9K_CUSTOM_WIFI_SIGNAL_BACKGROUND="white"
 POWERLEVEL9K_CUSTOM_WIFI_SIGNAL_FOREGROUND="black"
 
 zsh_wifi_signal(){
-        local output=$(/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -I)
-        local airport=$(echo $output | grep 'AirPort' | awk -F': ' '{print $2}')
+  #source on quality levels - http://www.wireless-nets.com/resources/tutorials/define_SNR_values.html
+  #source on signal levels  - http://www.speedguide.net/faq/how-to-read-rssisignal-and-snrnoise-ratings-440
+  local output=$(/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -I) 
+  local signal=$(echo $output | grep 'agrCtlRSSI' | awk -F': ' '{print $2}')
+  local speed=$(echo $output | grep 'lastTxRate' | awk -F': ' '{print $2}')
+  local noise=$(echo $output | grep 'agrCtlNoise' | awk -F': ' '{print $2}')
+  if [[ ! -z "${signal// }" ]] && [[ ! -z "${noise// }" ]] && local SNR=$(bc <<<"scale=2; $signal / $noise")
+  local net=$(curl -D- -o /dev/null -s http://www.google.com | grep HTTP/1.1 | awk '{print $2}')
+  local color='%F{yellow}'
+  local symbol="\uf700"
+  local mbs="Mbs"
 
-        if [ "$airport" = "Off" ]; then
-                local color='%F{black}'
-                echo -n "%{$color%}Wifi Off"
-        else
-                local ssid=$(echo $output | grep ' SSID' | awk -F': ' '{print $2}')
-                local speed=$(echo $output | grep 'lastTxRate' | awk -F': ' '{print $2}')
-                local color='%F{black}'
+  # Excellent Signal (5 bars)
+  if [[ ! -z "${signal// }" ]] && [[ $SNR -gt .40 ]] ; 
+    then color='%F{blue}' ; symbol="\uf1eb" ;
+  fi
+  # Good Signal (3-4 bars)
+  if [[ ! -z "${signal// }" ]] && [[ ! $SNR -gt .40 ]] && [[ $SNR -gt .25 ]] ; 
+    then color='%F{green}' ; symbol="\uf1eb" ;
+  fi
 
-                [[ $speed -gt 50 ]] && color='%F{green}'
-                [[ $speed -gt 25 ]] && [[ $speed -lt 50 ]] && color='%F{yellow}'
-                [[ $speed -lt 25 ]] && color='%F{red}'
+  # Low Signal (2 bars)
+  if [[ ! -z "${signal// }" ]] && [[ ! $SNR -gt .25 ]] && [[ $SNR -gt .15 ]] ; 
+    then color='%F{yellow}' ; symbol="\uf1eb" ;
+  fi
 
-                echo -n "%{$color%}\uf1eb %{%f%}" # removed char not in my PowerLine font
-        fi
+  # Very Low Signal (1 bar)
+  if [[ ! -z "${signal// }" ]] && [[ ! $SNR -gt .15 ]] && [[ $SNR -gt .10 ]] ; 
+    then color='%F{red}' ; symbol="\uf1eb" ;
+  fi
+
+  # No Signal - No Internet
+  if [[ ! -z "${signal// }" ]] && [[ ! $SNR -gt .10 ]] ; 
+    then color='%F{red}' ; symbol="\uf011";
+  fi
+  
+  if [[ -z "${signal// }" ]] && [[ "$net" -ne 200 ]] ; 
+    then color='%F{red}' ; symbol="\uf011" ; speed= '' ; mbs='' ;
+  fi
+
+  # Ethernet Connection (no wifi, hardline)
+  if [[ -z "${signal// }" ]] && [[ "$net" -eq 200 ]] ; 
+    then color='%F{blue}' ; symbol="\uf700" ; mbs='LAN' ;
+  fi
+  
+  echo -n "%{$color%}$symbol $speed$mbs" 
 }
 
 POWERLEVEL9K_CONTEXT_TEMPLATE="%F{"yellow"}%n%F{"yellow"}@%F{"yellow"}%m"
-POWERLEVEL9K_CONTEXT_DEFAULT_FOREGROUND='white'
-POWERLEVEL9K_CONTEXT_DEFAULT_BACKGROUND='none'
-POWERLEVEL9K_BATTERY_CHARGING='yellow'
+POWERLEVEL9K_CONTEXT_DEFAULT_FOREGROUND='black'
+POWERLEVEL9K_CONTEXT_DEFAULT_BACKGROUND='black'
+
+POWERLEVEL9K_BATTERY_CHARGING='green'
+POWERLEVEL9K_BATTERY_CHARGING_FOREGROUND='green'
 POWERLEVEL9K_BATTERY_CHARGING_BACKGROUND='white'
+
 POWERLEVEL9K_BATTERY_CHARGED='green'
+POWERLEVEL9K_BATTERY_CHARGED_FOREGROUND='green'
 POWERLEVEL9K_BATTERY_CHARGED_BACKGROUND='white'
+
 POWERLEVEL9K_BATTERY_DISCONNECTED='$DEFAULT_COLOR'
+POWERLEVEL9K_BATTERY_DISCONNECTED_FOREGROUND='black'
 POWERLEVEL9K_BATTERY_DISCONNECTED_BACKGROUND='white'
+
 POWERLEVEL9K_BATTERY_LOW_THRESHOLD='15'
 POWERLEVEL9K_BATTERY_LOW_COLOR='red'
+POWERLEVEL9K_BATTERY_LOW_FOREGROUND='red'
 POWERLEVEL9K_BATTERY_LOW_BACKGROUND='white'
+
 POWERLEVEL9K_BATTERY_VERBOSE=false
-POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX=''
 POWERLEVEL9K_PROMPT_ON_NEWLINE=false
+
 POWERLEVEL9K_VCS_MODIFIED_BACKGROUND='yellow'
 POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND='yellow'
 POWERLEVEL9K_VCS_UNTRACKED_ICON='?'
@@ -167,8 +205,6 @@ bytesToHuman() {
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 
-alias grep='grep --colour=auto'
-alias hgrep='history | grep'
 
 ################################################################
 # Key Bindings
