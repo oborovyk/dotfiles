@@ -72,11 +72,11 @@ zsh_wifi_signal(){
 
   # No Signal - No Internet
   if [[ ! -z "${signal// }" ]] && [[ ! $SNR -gt .10 ]] ; 
-    then color='%F{red}' ; symbol="\uf011";
+    then color='%F{red}' ; symbol="\uf818";
   fi
   
   if [[ -z "${signal// }" ]] && [[ "$net" -ne 200 ]] ; 
-    then color='%F{red}' ; symbol="\uf011" ; speed= '' ; mbs='' ;
+    then color='%F{red}' ; symbol="\uf818" ; speed= '' ; mbs='' ;
   fi
 
   # Ethernet Connection (no wifi, hardline)
@@ -91,16 +91,15 @@ POWERLEVEL9K_CONTEXT_TEMPLATE="%F{"yellow"}%n%F{"yellow"}@%F{"yellow"}%m"
 POWERLEVEL9K_CONTEXT_DEFAULT_FOREGROUND='black'
 POWERLEVEL9K_CONTEXT_DEFAULT_BACKGROUND='black'
 
-POWERLEVEL9K_BATTERY_CHARGING='green'
-POWERLEVEL9K_BATTERY_CHARGING_FOREGROUND='green'
-POWERLEVEL9K_BATTERY_CHARGING_BACKGROUND='white'
 
-POWERLEVEL9K_BATTERY_CHARGED='green'
-POWERLEVEL9K_BATTERY_CHARGED_FOREGROUND='green'
+POWERLEVEL9K_BATTERY_CHARGING='green'
+POWERLEVEL9K_BATTERY_CHARGING_BACKGROUND='white'
+POWERLEVEL9K_BATTERY_CHARGING_ICON='white'
+
+POWERLEVEL9K_BATTERY_CHARGED='blue'
 POWERLEVEL9K_BATTERY_CHARGED_BACKGROUND='white'
 
 POWERLEVEL9K_BATTERY_DISCONNECTED='$DEFAULT_COLOR'
-POWERLEVEL9K_BATTERY_DISCONNECTED_FOREGROUND='black'
 POWERLEVEL9K_BATTERY_DISCONNECTED_BACKGROUND='white'
 
 POWERLEVEL9K_BATTERY_LOW_THRESHOLD='15'
@@ -114,6 +113,7 @@ POWERLEVEL9K_PROMPT_ON_NEWLINE=false
 POWERLEVEL9K_VCS_MODIFIED_BACKGROUND='yellow'
 POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND='yellow'
 POWERLEVEL9K_VCS_UNTRACKED_ICON='?'
+
 
 
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context battery custom_wifi_signal_joined time_joined  dir vcs)
