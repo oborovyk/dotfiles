@@ -1,31 +1,4 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
-################################################################
-# DEV config
-################################################################
-export ARTIFACTORY_DOCKER_URL=changeit
-export ARTIFACTORY_CONTEXT_URL=changeit
-
-export ARTIFACTORY_USERNAME=changeit
-export ARTIFACTORY_PASSWORD=changeit
-export SONAR_TOKEN=changeit
-
-# Path to your oh-my-zsh installation.
-export ZSH=/Users/oborovyk/.oh-my-zsh
-
-export NVM_DIR="$HOME/.nvm"
-  . "/usr/local/opt/nvm/nvm.sh"
-
-export GOPATH=$HOME/development/golangtest
-export GO111MODULE=on
-
-export GRADLE_HOME=/usr/local/opt/gradle/libexec
-
-export PATH=/Users/oborovyk/development/hyperledger/bin:$PATH
-
-# You may need to manually set your language environment
-export LANG=en_US.UTF-8
+#!/bin/zsh
 
 ################################################################
 # Powerlevel
@@ -42,46 +15,48 @@ zsh_wifi_signal(){
   #source on quality levels - http://www.wireless-nets.com/resources/tutorials/define_SNR_values.html
   #source on signal levels  - http://www.speedguide.net/faq/how-to-read-rssisignal-and-snrnoise-ratings-440
   local output=$(/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -I) 
-  local signal=$(echo $output | grep 'agrCtlRSSI' | awk -F': ' '{print $2}')
-  local speed=$(echo $output | grep 'lastTxRate' | awk -F': ' '{print $2}')
-  local noise=$(echo $output | grep 'agrCtlNoise' | awk -F': ' '{print $2}')
-  if [[ ! -z "${signal// }" ]] && [[ ! -z "${noise// }" ]] && local SNR=$(bc <<<"scale=2; $signal / $noise")
+  local signal=$(echo $output | grep "agrCtlRSSI" | awk -F': ' '{print $2}')
+  local speed=$(echo $output | grep "lastTxRate" | awk -F': ' '{print $2}')
+  local noise=$(echo $output | grep "agrCtlNoise" | awk -F': ' '{print $2}')
+  if [[ -n "${signal// }" ]] && [[ ! -z "${noise// }" ]]  
+    then local SNR=$(bc <<<"scale=2; $signal / $noise")
+  fi
   local net=$(curl -D- -o /dev/null -s http://www.google.com | grep HTTP/1.1 | awk '{print $2}')
   local color='%F{yellow}'
-  local symbol="\uf700"
+  local symbol="\uf1eb"
   local mbs="Mbs"
 
   # Excellent Signal (5 bars)
-  if [[ ! -z "${signal// }" ]] && [[ $SNR -gt .40 ]] ; 
+  if [[ -n "${signal// }" ]] && [[ $SNR -gt .40 ]] ; 
     then color='%F{blue}' ; symbol="\uf1eb" ;
   fi
   # Good Signal (3-4 bars)
-  if [[ ! -z "${signal// }" ]] && [[ ! $SNR -gt .40 ]] && [[ $SNR -gt .25 ]] ; 
+  if [[ -n "${signal// }" ]] && [[ ! $SNR -gt .40 ]] && [[ $SNR -gt .25 ]] ; 
     then color='%F{green}' ; symbol="\uf1eb" ;
   fi
 
   # Low Signal (2 bars)
-  if [[ ! -z "${signal// }" ]] && [[ ! $SNR -gt .25 ]] && [[ $SNR -gt .15 ]] ; 
+  if [[ -n "${signal// }" ]] && [[ ! $SNR -gt .25 ]] && [[ $SNR -gt .15 ]] ; 
     then color='%F{yellow}' ; symbol="\uf1eb" ;
   fi
 
   # Very Low Signal (1 bar)
-  if [[ ! -z "${signal// }" ]] && [[ ! $SNR -gt .15 ]] && [[ $SNR -gt .10 ]] ; 
+  if [[ -n "${signal// }" ]] && [[ ! $SNR -gt .15 ]] && [[ $SNR -gt .10 ]] ; 
     then color='%F{red}' ; symbol="\uf1eb" ;
   fi
 
   # No Signal - No Internet
-  if [[ ! -z "${signal// }" ]] && [[ ! $SNR -gt .10 ]] ; 
+  if [[ -n "${signal// }" ]] && [[ ! $SNR -gt .10 ]] ; 
     then color='%F{red}' ; symbol="\uf818";
   fi
   
   if [[ -z "${signal// }" ]] && [[ "$net" -ne 200 ]] ; 
-    then color='%F{red}' ; symbol="\uf818" ; speed= '' ; mbs='' ;
+    then color='%F{red}' ; symbol="\uf818" ; speed='' ; mbs='' ;
   fi
 
   # Ethernet Connection (no wifi, hardline)
   if [[ -z "${signal// }" ]] && [[ "$net" -eq 200 ]] ; 
-    then color='%F{blue}' ; symbol="\uf700" ; mbs='LAN' ;
+    then color='%F{blue}' ; symbol="\uf817" ; mbs='' ;
   fi
   
   echo -n "%{$color%}$symbol $speed$mbs" 
@@ -91,39 +66,32 @@ POWERLEVEL9K_CONTEXT_TEMPLATE="%F{"yellow"}%n%F{"yellow"}@%F{"yellow"}%m"
 POWERLEVEL9K_CONTEXT_DEFAULT_FOREGROUND='black'
 POWERLEVEL9K_CONTEXT_DEFAULT_BACKGROUND='black'
 
-
-POWERLEVEL9K_BATTERY_CHARGING='green'
+POWERLEVEL9K_BATTERY_CHARGING_FOREGROUND='green'
 POWERLEVEL9K_BATTERY_CHARGING_BACKGROUND='white'
-POWERLEVEL9K_BATTERY_CHARGING_ICON='white'
-
-POWERLEVEL9K_BATTERY_CHARGED='blue'
+POWERLEVEL9K_BATTERY_CHARGED_FOREGROUND='blue'
 POWERLEVEL9K_BATTERY_CHARGED_BACKGROUND='white'
-
-POWERLEVEL9K_BATTERY_DISCONNECTED='$DEFAULT_COLOR'
+POWERLEVEL9K_BATTERY_DISCONNECTED_FOREGROUND='black'
 POWERLEVEL9K_BATTERY_DISCONNECTED_BACKGROUND='white'
-
 POWERLEVEL9K_BATTERY_LOW_THRESHOLD='15'
-POWERLEVEL9K_BATTERY_LOW_COLOR='red'
 POWERLEVEL9K_BATTERY_LOW_FOREGROUND='red'
 POWERLEVEL9K_BATTERY_LOW_BACKGROUND='white'
-
 POWERLEVEL9K_BATTERY_VERBOSE=false
+
 POWERLEVEL9K_PROMPT_ON_NEWLINE=false
 
 POWERLEVEL9K_VCS_MODIFIED_BACKGROUND='yellow'
 POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND='yellow'
 POWERLEVEL9K_VCS_UNTRACKED_ICON='?'
 
-
-
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context battery custom_wifi_signal_joined time_joined  dir vcs)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status command_execution_time background_jobs)
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context battery custom_wifi_signal_joined time_joined  dir)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status command_execution_time background_jobs vcs)
 
 POWERLEVEL9K_SHORTEN_STRATEGY="truncate_middle"
 POWERLEVEL9K_SHORTEN_DIR_LENGTH=3
 
 POWERLEVEL9K_TIME_FORMAT="%D{%H:%M}"
 POWERLEVEL9K_TIME_BACKGROUND='white'
+POWERLEVEL9K_TIME_FOREGROUND='black'
 POWERLEVEL9K_TIME_ICON=''
 # POWERLEVEL9K_HOME_ICON=''
 # POWERLEVEL9K_HOME_SUB_ICON=''
@@ -131,13 +99,14 @@ POWERLEVEL9K_TIME_ICON=''
 POWERLEVEL9K_STATUS_VERBOSE=true
 POWERLEVEL9K_STATUS_CROSS=true
 
+POWERLEVEL9K_PROMPT_ADD_NEWLINE=false
 
 ################################################################
 # History
 ################################################################
 
 export HISTFILE=~/.zsh_history
-export HISTSIZE=20000
+export HISTSIZE=50000
 export SAVEHIST=$HISTSIZE
 
 setopt APPEND_HISTORY
@@ -205,6 +174,7 @@ bytesToHuman() {
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 
+alias networkInfo='/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -I'
 
 ################################################################
 # Key Bindings
@@ -221,9 +191,8 @@ bindkey "^y" accept-and-hold
 bindkey "^w" backward-kill-word
 
 ################################################################
-# SDKMAN + JENV
+# SDKMAN
 ################################################################
-eval "$(jenv init -)"
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="/Users/oborovyk/.sdkman"
 [[ -s "/Users/oborovyk/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/oborovyk/.sdkman/bin/sdkman-init.sh"
